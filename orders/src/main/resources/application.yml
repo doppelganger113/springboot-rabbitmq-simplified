@@ -1,0 +1,22 @@
+spring:
+  rabbitmq:
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    listener:
+      simple:
+        default-requeue-rejected: false
+        acknowledge-mode: manual
+        prefetch: 50
+
+logging:
+  level:
+    root: ${LOG_LEVEL:INFO}
+    org:
+      springframework:
+        boot:
+          autoconfigure: ERROR
+
+server:
+  shutdown: graceful
