@@ -58,8 +58,7 @@ public class TopicProcessor<T> {
 
       // Must be called after retrieving the routing key to not erase data
       if (isMessageFromParkingLotQueue(receivedRoutingKey)) {
-        // TODO: Check what was null, probably was missing death headers
-        if(msg.getMessageProperties().getXDeathHeader() != null) {
+        if (msg.getMessageProperties().getXDeathHeader() != null) {
           msg.getMessageProperties().getXDeathHeader().clear();
         }
       }
@@ -79,13 +78,8 @@ public class TopicProcessor<T> {
         .orElseThrow(() ->
           new EventProcessorNotFound("Could not find processor for route: " + routingKey));
 
-
-      log.info("Found processor");
-      log.info("Converting");
       converted = converter.convert(body);
-      log.info("Processing");
       processor.process(converted);
-      log.info("Done processing.");
       acknowledgeProcessedMessage(msg, channel, deliveryTag);
     } catch (Exception e) {
       log.error("Processing failed: {}", e.getMessage());

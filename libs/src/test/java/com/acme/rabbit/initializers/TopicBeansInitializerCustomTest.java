@@ -11,42 +11,42 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 
 @SpringBootTest
-class TopicBeansInitializerTest {
-
+@ContextConfiguration(classes = SampleSpringApp.class, initializers = CustomInitializer.class)
+public class TopicBeansInitializerCustomTest {
   @Autowired
-  private ApplicationContext context;
+  public ApplicationContext context;
 
   @Test
-  public void validateBeans() {
+  public void validateCustomBeanNames() {
     Assert.assertNotNull(
       "Exchange bean should not be null",
-      context.getBean("exchange", TopicExchange.class)
+      context.getBean("custom-exchange", TopicExchange.class)
     );
 
     Assert.assertNotNull(
       "Worker Queue bean should not be null",
-      context.getBean("workerQueue", Queue.class)
+      context.getBean("custom-worker", Queue.class)
     );
     Assert.assertNotNull(
       "Wait Queue bean should not be null",
-      context.getBean("waitQueue", Queue.class)
+      context.getBean("custom-wait", Queue.class)
     );
     Assert.assertNotNull(
       "Parking Lot Queue bean should not be null",
-      context.getBean("parkingLotQueue", Queue.class)
+      context.getBean("custom-parking-lot-queue", Queue.class)
     );
 
     Assert.assertNotNull(
       "Worker queue binding bean should not be null",
-      context.getBean("workerQueueBinding", Binding.class)
+      context.getBean("custom-worker-binding", Binding.class)
     );
     Assert.assertNotNull(
       "Wait queue binding bean should not be null",
-      context.getBean("waitQueueBinding", Binding.class)
+      context.getBean("custom-wait-binding", Binding.class)
     );
     Assert.assertNotNull(
       "Worker queue binding bean should not be null",
-      context.getBean("parkingLotQueueBinding", Binding.class)
+      context.getBean("custom-parking-lot-binding", Binding.class)
     );
   }
 }
