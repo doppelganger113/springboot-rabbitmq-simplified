@@ -1,7 +1,4 @@
 package com.acme.rabbit.processors;
 
-import org.springframework.amqp.core.Message;
-
-public interface EventProcessor {
-  void process(String message);
+public interface EventProcessor<T> extends EventProcessing<T>, FailureProcessing<T> {
 }

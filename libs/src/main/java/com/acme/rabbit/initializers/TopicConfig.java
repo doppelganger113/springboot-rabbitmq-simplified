@@ -1,23 +1,22 @@
 package com.acme.rabbit.initializers;
 
 public class TopicConfig implements ITopicConfig {
-  private String namespace;
   private int waitQueueTtlMillis;
   private int maxRetries;
-  private String exchangeName;
+  private String exchange;
   private String workerQueueName;
   private String waitQueueName;
   private String parkingLotQueueName;
   private String bindingKey;
 
-  private TopicConfig(String namespace, int waitQueueTtlMillis) {
-    this.namespace = namespace;
+  private TopicConfig(String exchange, int waitQueueTtlMillis) {
+    this.exchange = exchange;
     this.waitQueueTtlMillis = waitQueueTtlMillis;
   }
 
   @Override
-  public String getNamespace() {
-    return this.namespace;
+  public String getExchange() {
+    return this.exchange;
   }
 
   @Override
@@ -28,11 +27,6 @@ public class TopicConfig implements ITopicConfig {
   @Override
   public int getMaxRetries() {
     return this.maxRetries;
-  }
-
-  @Override
-  public String getExchangeName() {
-    return this.exchangeName;
   }
 
   @Override
@@ -56,25 +50,19 @@ public class TopicConfig implements ITopicConfig {
   }
 
   public static class Builder {
-    private final String namespace;
 
     private int waitQueueTtlMillis = 1_800_000; // 30min
     private int maxRetries = 3;
 
-    private String exchangeName;
+    private final String exchange;
     private String workerQueueName;
     private String waitQueueName;
     private String parkingLotQueueName;
     private String bindingKey;
 
-    public Builder(String namespace) {
-      this.namespace = namespace;
-      setDefaultValues(namespace);
-    }
-
-    public Builder withExchange(String exchangeName) {
-      this.exchangeName = exchangeName;
-      return this;
+    public Builder(String exchange) {
+      this.exchange = exchange;
+      setDefaultValues(exchange);
     }
 
     public Builder withWorkerQueueName(String workerQueueName) {
@@ -123,9 +111,8 @@ public class TopicConfig implements ITopicConfig {
     }
 
     public TopicConfig build() {
-      var config = new TopicConfig(namespace, waitQueueTtlMillis);
-      config.namespace = namespace;
-      config.exchangeName = exchangeName;
+      var config = new TopicConfig(exchange, waitQueueTtlMillis);
+      config.exchange = exchange;
       config.workerQueueName = workerQueueName;
       config.waitQueueName = waitQueueName;
       config.parkingLotQueueName = parkingLotQueueName;
@@ -135,10 +122,9 @@ public class TopicConfig implements ITopicConfig {
       return config;
     }
 
-    private void setDefaultValues(String namespace) {
-      bindingKey = namespace + ".*";
-      exchangeName = namespace;
-      workerQueueName = namespace + "-queue";
+    private void setDefaultValues(String exchange) {
+      bindingKey = exchange + ".*";
+      workerQueueName = exchange + "-queue";
       waitQueueName = workerQueueName + ".wait";
       parkingLotQueueName = this.workerQueueName + ".parking-lot";
     }
@@ -147,10 +133,10 @@ public class TopicConfig implements ITopicConfig {
   @Override
   public String toString() {
     return "TopicConfig{" +
-      "namespace='" + namespace + '\'' +
+      "exchangeName='" + exchange + '\'' +
       ", waitQueueTtlMillis=" + waitQueueTtlMillis +
       ", maxRetries=" + maxRetries +
-      ", exchangeName='" + exchangeName + '\'' +
+      ", exchangeName='" + exchange + '\'' +
       ", workerQueueName='" + workerQueueName + '\'' +
       ", waitQueueName='" + waitQueueName + '\'' +
       ", parkingLotQueueName='" + parkingLotQueueName + '\'' +

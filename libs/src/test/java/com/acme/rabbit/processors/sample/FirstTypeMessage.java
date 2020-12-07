@@ -1,4 +1,4 @@
-package com.acme.orders.events.models;
+package com.acme.rabbit.processors.sample;
 
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -10,7 +10,7 @@ import org.springframework.lang.Nullable;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-public class Burger extends Order {
+public class FirstTypeMessage extends SampleTestMessage {
   @Nullable
-  Integer calories;
+  Integer value;
 }

@@ -2,6 +2,7 @@ package com.acme.orders.events;
 
 import com.acme.orders.events.models.Burger;
 import com.acme.orders.events.models.Order;
+import com.acme.rabbit.converters.BodyConverter;
 import com.acme.rabbit.initializers.ITopicConfig;
 import com.acme.rabbit.processors.TopicProcessor;
 import com.acme.rabbit.processors.TopicRouter;
@@ -18,51 +19,54 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 class Consumer {
-
-  private final RabbitTemplate rabbitTemplate;
-  private final ITopicConfig config;
-  private final TopicProcessor topicProcessor;
+  private final TopicProcessor<Order> topicProcessor;
   private final ObjectMapper objectMapper;
+  private final CustomEventProcessor customEventProcessor;
 
-  Consumer(
+  public Consumer(
     RabbitTemplate rabbitTemplate,
     ITopicConfig config,
-    ObjectMapper objectMapper
-  ) {
-    this.rabbitTemplate = rabbitTemplate;
-    this.config = config;
-    this.topicProcessor = new TopicProcessor(rabbitTemplate, config);
+    ObjectMapper objectMapper,
+    CustomEventProcessor customEventProcessor) {
     this.objectMapper = objectMapper;
+    this.customEventProcessor = customEventProcessor;
+    TopicRouter<Order> router = createRouter();
+
+    this.topicProcessor = new TopicProcessor<>(
+      rabbitTemplate,
+      config,
+      router,
+      createOrderConverter()
+    );
   }
 
   @RabbitListener(queues = "orders-queue")
   void handleMessage(
-    String body,
     Message message,
     Channel channel,
     @Header(AmqpHeaders.DELIVERY_TAG) long deliveryTag,
     @Header(AmqpHeaders.RECEIVED_ROUTING_KEY) String receivedRoutingKey
   ) {
-    new TopicRouter()
-      .on("created",
-        msg -> {
-          System.out.println(msg);
+    topicProcessor.process(
+      message, channel, deliveryTag, receivedRoutingKey
+    );
+  }
+
+  private BodyConverter<Order> createOrderConverter() {
+    return message -> objectMapper.readValue(message, Order.class);
+  }
+
+  private TopicRouter<Order> createRouter() {
+    return new TopicRouter<Order>()
+      .on("orders.created", msg -> {
+          log.info("Received created message {}", msg.getName());
+          log.info("Casted to Burger {}", ((Burger) msg).getCalories());
         },
-        error -> {
-          System.out.println("An error" + error);
+        (err, msg) -> {
+          log.error("Handling error from created message, err: {} and msg: {}", err, msg);
         }
-      );
-    try {
-      log.info("Consumed from queue message: {}", body);
-      var value = objectMapper.readValue(body, Order.class);
-      log.info("Parsed order: {}", value);
-      var burger = (Burger) value;
-      log.info("Parsed Burger: {}", burger);
-      log.info("Value: {}", (Burger) value);
-    } catch (Exception e) {
-      log.error("Error parsing the JSON", e);
-      e.printStackTrace();
-    }
-    topicProcessor.process(message, channel, deliveryTag, receivedRoutingKey);
+      )
+      .on("orders.updated", msg -> log.info("Just updated without error handling"))
+      .on("orders.custom", this.customEventProcessor);
   }
 }

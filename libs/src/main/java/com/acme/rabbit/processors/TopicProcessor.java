@@ -1,6 +1,9 @@
 package com.acme.rabbit.processors;
 
+import com.acme.rabbit.converters.BodyConverter;
 import com.acme.rabbit.initializers.ITopicConfig;
+import com.acme.rabbit.processors.errors.EventProcessorNotFound;
+import com.acme.rabbit.processors.errors.RouteNotFound;
 import com.rabbitmq.client.Channel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.Message;
@@ -12,20 +15,26 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 @Slf4j
-public class TopicProcessor {
+public class TopicProcessor<T> {
   private static final boolean REJECT_MULTIPLE_DELIVERIES = false;
   private static final boolean REQUEUE_REJECTED_MESSAGES = false;
   private static final boolean ACKNOWLEDGE_MULTIPLE_DELIVERIES = false;
 
   private final RabbitTemplate rabbitTemplate;
   private final ITopicConfig topicConfig;
+  private final TopicRouter<T> topicRouter;
+  private final BodyConverter<T> converter;
 
   public TopicProcessor(
     RabbitTemplate rabbitTemplate,
-    ITopicConfig topicConfig
+    ITopicConfig topicConfig,
+    TopicRouter<T> topicRouter,
+    BodyConverter<T> converter
   ) {
     this.rabbitTemplate = rabbitTemplate;
     this.topicConfig = topicConfig;
+    this.topicRouter = topicRouter;
+    this.converter = converter;
   }
 
   public void process(
@@ -33,6 +42,11 @@ public class TopicProcessor {
     Channel channel,
     long deliveryTag,
     String receivedRoutingKey) {
+    var body = new String(msg.getBody(), StandardCharsets.UTF_8);
+
+    Optional<EventProcessor<T>> optionalProcessor = Optional.empty();
+    T converted = null;
+
     try {
       log.info(
         "receivedRoutingKey {} - RabbitListener received message '{}' on channel {}",
@@ -40,13 +54,14 @@ public class TopicProcessor {
       );
       checkMessagePersistence(msg);
 
-      var routingKey = extractRoutingKeyFromMessage(msg, receivedRoutingKey);
-      log.info("Routing key: {}", routingKey);
+      var optionalRoutingKey = extractRoutingKeyFromMessage(msg, receivedRoutingKey);
 
       // Must be called after retrieving the routing key to not erase data
       if (isMessageFromParkingLotQueue(receivedRoutingKey)) {
-        msg.getMessageProperties().getXDeathHeader().clear();
-        log.info("Cleared headers in msg: {}", msg);
+        // TODO: Check what was null, probably was missing death headers
+        if(msg.getMessageProperties().getXDeathHeader() != null) {
+          msg.getMessageProperties().getXDeathHeader().clear();
+        }
       }
 
       if (hasExceededMaxRetry(msg)) {
@@ -54,12 +69,33 @@ public class TopicProcessor {
         return;
       }
 
-      process(msg);
+      // We want to throw only after the message checks are done, to prevent infinite requeue
+      var routingKey = optionalRoutingKey
+        .orElseThrow(() -> new RouteNotFound(receivedRoutingKey));
+      log.info("Routing key: {}", routingKey);
 
+      optionalProcessor = topicRouter.getEventProcessorByRoute(routingKey);
+      var processor = optionalProcessor
+        .orElseThrow(() ->
+          new EventProcessorNotFound("Could not find processor for route: " + routingKey));
+
+
+      log.info("Found processor");
+      log.info("Converting");
+      converted = converter.convert(body);
+      log.info("Processing");
+      processor.process(converted);
+      log.info("Done processing.");
       acknowledgeProcessedMessage(msg, channel, deliveryTag);
     } catch (Exception e) {
-      log.error("Processing failed with error: {}", e.getMessage());
+      log.error("Processing failed: {}", e.getMessage());
       e.printStackTrace();
+
+      T finalConverted = converted;
+      optionalProcessor.ifPresent(eventProcessor ->
+        eventProcessor.onError(e, finalConverted));
+
+      log.error("Rejecting message {}", msg);
       rejectMessage(msg, channel, deliveryTag, e);
     }
   }
@@ -89,15 +125,6 @@ public class TopicProcessor {
       "Generating e-mail to inform that we have exceeded MaxRetry for message '{}'.",
       message
     );
-  }
-
-  void process(Message message) {
-    var transferObject = new String(message.getBody(), StandardCharsets.UTF_8);
-    log.info("Processing transfer object: {}", transferObject);
-    if (transferObject.equals("error")) {
-      throw new RuntimeException("Testing an error");
-    }
-    log.info("Finished processing the message");
   }
 
   void acknowledgeProcessedMessage(
@@ -157,7 +184,7 @@ public class TopicProcessor {
     var exchangeFromHeaderMap = (String) headerMap.get("exchange");
     var queueFromHeaderMap = (String) headerMap.get("queue");
 
-    var areExchangesEqual = topicConfig.getExchangeName().equals(exchangeFromHeaderMap);
+    var areExchangesEqual = topicConfig.getExchange().equals(exchangeFromHeaderMap);
     var areQueuesEqual = queue.equals(queueFromHeaderMap);
 
     return areExchangesEqual && areQueuesEqual;
@@ -175,8 +202,10 @@ public class TopicProcessor {
 
   Optional<String> extractRoutingKeyFromMessage(Message message, String receivedRoutingKey) {
     if (isMessageFromWaitQueue(receivedRoutingKey)) {
+      log.info("Message is from WAIT_QUEUE");
       return extractRoutingKeyFromMessageByQueue(message);
     } else if (isMessageFromParkingLotQueue(receivedRoutingKey)) {
+      log.info("MESSAGE is FROM PARKING LOT QUEUE");
       return extractRoutingKeyFromMessageByQueue(message);
     }
 

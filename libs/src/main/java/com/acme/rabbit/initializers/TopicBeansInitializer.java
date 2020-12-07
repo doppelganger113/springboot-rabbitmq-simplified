@@ -47,17 +47,17 @@ public class TopicBeansInitializer {
     context.registerBean(ITopicConfig.class, () -> config);
 
     // Exchange
-    var exchange = new TopicExchange(config.getExchangeName());
+    var exchange = new TopicExchange(config.getExchange());
     context.registerBean(beanNames.getExchange(), TopicExchange.class, () -> exchange);
 
     // Queues
     var workingQueue = QueueBuilder.durable(config.getWorkerQueueName())
-      .deadLetterExchange(config.getExchangeName())
+      .deadLetterExchange(config.getExchange())
       .deadLetterRoutingKey(config.getWaitQueueName())
       .build();
 
     var waitQueue = QueueBuilder.durable(config.getWaitQueueName())
-      .deadLetterExchange(config.getExchangeName())
+      .deadLetterExchange(config.getExchange())
       .deadLetterRoutingKey(config.getBindingKey())
       .ttl(config.getWaitQueueTtlMillis())
       .build();

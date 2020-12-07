@@ -1,13 +1,11 @@
 package com.acme.rabbit.initializers;
 
 public interface ITopicConfig {
-  String getNamespace();
+  String getExchange();
 
   int getWaitQueueTtlMillis();
 
   int getMaxRetries();
-
-  String getExchangeName();
 
   String getWorkerQueueName();
 
