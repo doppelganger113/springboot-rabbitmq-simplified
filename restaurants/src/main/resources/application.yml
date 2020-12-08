@@ -20,4 +20,4 @@ logging:
 
 server:
   shutdown: graceful
-  port: 8081
+  port: 8082

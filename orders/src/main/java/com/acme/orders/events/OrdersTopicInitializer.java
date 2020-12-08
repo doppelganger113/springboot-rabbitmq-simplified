@@ -5,7 +5,7 @@ import com.acme.rabbit.initializers.TopicConfig;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.support.GenericApplicationContext;
 
-public class RabbitTopicBeanInitializer implements ApplicationContextInitializer<GenericApplicationContext> {
+public class OrdersTopicInitializer implements ApplicationContextInitializer<GenericApplicationContext> {
   @Override
   public void initialize(GenericApplicationContext context) {
     var config = new TopicConfig.Builder("orders")

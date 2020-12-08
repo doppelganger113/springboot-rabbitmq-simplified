@@ -1,6 +1,6 @@
-package com.acme.orders;
+package com.acme.restaurants;
 
-import com.acme.orders.events.OrdersTopicInitializer;
+import com.acme.restaurants.events.RestaurantTopicInitializer;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 
@@ -9,7 +9,7 @@ public class SpringApp {
   public static void main(String[] args) {
     new SpringApplicationBuilder()
       .sources(SpringApp.class)
-      .initializers(new OrdersTopicInitializer())
+      .initializers(new RestaurantTopicInitializer())
       .run(args);
   }
 }
