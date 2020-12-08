@@ -94,7 +94,7 @@ public class TopicProcessor<T> {
     }
   }
 
-  private void rejectMessage(Message message, Channel channel, long deliveryTag, Exception e) {
+  public void rejectMessage(Message message, Channel channel, long deliveryTag, Exception e) {
     try {
       channel.basicNack(deliveryTag, REJECT_MULTIPLE_DELIVERIES, REQUEUE_REJECTED_MESSAGES);
       log.info("NACK-end message {} because of exception {}", message, e.getMessage());

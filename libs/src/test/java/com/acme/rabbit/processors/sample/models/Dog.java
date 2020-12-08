@@ -1,4 +1,4 @@
-package com.acme.rabbit.processors.sample;
+package com.acme.rabbit.processors.sample.models;
 
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -10,7 +10,12 @@ import org.springframework.lang.Nullable;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-public class FirstTypeMessage extends SampleTestMessage {
+public class Dog extends Animal {
   @Nullable
-  Integer value;
+  String breed;
+
+  public Dog(String name, String breed) {
+    super(name);
+    this.breed = breed;
+  }
 }

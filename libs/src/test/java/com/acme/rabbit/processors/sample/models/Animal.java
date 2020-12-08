@@ -1,4 +1,4 @@
-package com.acme.rabbit.processors.sample;
+package com.acme.rabbit.processors.sample.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
@@ -16,10 +16,10 @@ import org.springframework.lang.Nullable;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes({
-  @JsonSubTypes.Type(value = FirstTypeMessage.class, name = "First"),
-  @JsonSubTypes.Type(value = SecondTypeMessage.class, name = "Second")
+  @JsonSubTypes.Type(value = Cat.class, name = "Cat"),
+  @JsonSubTypes.Type(value = Dog.class, name = "Dog")
 })
-public class SampleTestMessage {
+public class Animal {
   @Nullable
   String name;
 }
