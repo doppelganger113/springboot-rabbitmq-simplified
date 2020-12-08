@@ -2,7 +2,6 @@ package com.acme.rabbit.initializers;
 
 import lombok.Builder;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 
 /**
  * Used to provide a way of changing the bean names in case the need requires so.

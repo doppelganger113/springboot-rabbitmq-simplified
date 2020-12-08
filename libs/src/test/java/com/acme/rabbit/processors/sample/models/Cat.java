@@ -4,6 +4,10 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.springframework.lang.Nullable;
 
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
@@ -11,7 +15,8 @@ import org.springframework.lang.Nullable;
 @NoArgsConstructor
 @SuperBuilder
 public class Cat extends Animal {
-  @Nullable
+  @NotNull
+  @Max(2)
   int age;
 
   public Cat(String name, int age) {

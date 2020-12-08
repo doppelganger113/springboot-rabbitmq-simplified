@@ -1,4 +1,4 @@
-package com.acme.orders.events;
+package com.acme.orders.events.processors;
 
 import com.acme.orders.events.models.Burger;
 import com.acme.orders.events.models.Order;
@@ -9,10 +9,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
-@Component
 @Slf4j
 @RequiredArgsConstructor
-public class CustomEventProcessor implements EventProcessor<Order> {
+@Component
+public class BurgerProcessor implements EventProcessor<Order> {
 
   private final RabbitClient rabbitClient;
 

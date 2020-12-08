@@ -1,6 +1,7 @@
 package com.acme.rabbit.processors;
 
 import com.acme.rabbit.initializers.ITopicConfig;
+import com.acme.rabbit.initializers.SampleInitializer;
 import com.acme.rabbit.processors.errors.EventProcessorNotFound;
 import com.acme.rabbit.processors.sample.Listener;
 import com.acme.rabbit.processors.sample.MyProcessor;
@@ -17,10 +18,12 @@ import org.springframework.amqp.rabbit.test.RabbitListenerTestHarness;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.test.context.ContextConfiguration;
 
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
+@ContextConfiguration(initializers = SampleInitializer.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class TopicProcessorTest {
   @Autowired
