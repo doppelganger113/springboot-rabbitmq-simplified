@@ -19,7 +19,7 @@
         <java.version>11</java.version>
 
         <!-- Sonar cube -->
-        <sonar.projectKey>doppelganger113_springboot-rabbitmq-simplified</sonar.projectKey>
+        <sonar.projectKey>springboot-rabbitmq-simplified_${project.groupId}:${project.artifactId}</sonar.projectKey>
         <sonar.organization>doppelganger113</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     </properties>
