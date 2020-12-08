@@ -46,7 +46,7 @@ public class TopicConfigTest {
 
   @Test
   public void shouldBuildCustom() {
-    ITopicConfig config = new TopicConfig.Builder("orders")
+    ITopicConfig config = new TopicConfig.Builder("my-exchange")
       .withWorkerQueueName("my-worker-queue")
       .withWaitQueueName("my-wait-queue")
       .withParkingLotQueueName("my-parking-lot")

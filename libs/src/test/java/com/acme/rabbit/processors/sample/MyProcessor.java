@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 public class MyProcessor implements EventProcessor<Animal> {
   @Override
   public void process(Animal message) throws Exception {
-    System.out.println("Processing");
   }
 
   @Override

@@ -7,7 +7,7 @@ public class SampleInitializer implements ApplicationContextInitializer<GenericA
   @Override
   public void initialize(GenericApplicationContext context) {
     var config = new TopicConfig.Builder("orders")
-      .withWaitQueueTtlSeconds(5)
+      .withWaitQueueTtlMillis(50)
       .build();
     TopicBeansInitializer.setContextBeans(context, config);
   }
