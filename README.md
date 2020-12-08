@@ -1,3 +1,7 @@
+# Spring boot RabbitMQ simplified
+
+![GitHub Action](https://github.com/doppelganger113/springboot-rabbitmq-simplified/workflows/Java%20CI%20with%20Maven/badge.svg)
+
 ## Requirements
  - Docker and docker-compose
  

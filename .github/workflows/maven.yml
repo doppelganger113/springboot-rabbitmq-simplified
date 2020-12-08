@@ -32,6 +32,6 @@ jobs:
       uses: nijel/rabbitmq-action@v1.0.0
       with:
         # Version of RabbitMQ to use
-        rabbitmq version: default
+        rabbitmq version: 3.8.9
     - name: Build with Maven
       run: mvn -B package --file pom.xml
