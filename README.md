@@ -128,28 +128,28 @@ public class TopicConfiguration {
 ```
 ### 5. Attaching the listener
 we can start processing messages based on the routing key.
-    ```java
-    @Component
-    class Consumer {
-      private final TopicProcessor<Order> topicProcessor;
-    
-      Consumer(TopicProcessor<Order> topicProcessor) {
-        this.topicProcessor = topicProcessor;
-      }
-    
-      @RabbitListener(queues = "orders-queue")
-      void handleMessage(
-        Message message,
-        Channel channel,
-        @Header(AmqpHeaders.DELIVERY_TAG) long deliveryTag,
-        @Header(AmqpHeaders.RECEIVED_ROUTING_KEY) String receivedRoutingKey
-      ) {
-        topicProcessor.process(
-          message, channel, deliveryTag, receivedRoutingKey
-        );
-      }
-    }
-    ```
+```java
+@Component
+class Consumer {
+  private final TopicProcessor<Order> topicProcessor;
+
+  Consumer(TopicProcessor<Order> topicProcessor) {
+    this.topicProcessor = topicProcessor;
+  }
+
+  @RabbitListener(queues = "orders-queue")
+  void handleMessage(
+    Message message,
+    Channel channel,
+    @Header(AmqpHeaders.DELIVERY_TAG) long deliveryTag,
+    @Header(AmqpHeaders.RECEIVED_ROUTING_KEY) String receivedRoutingKey
+  ) {
+    topicProcessor.process(
+      message, channel, deliveryTag, receivedRoutingKey
+    );
+  }
+}
+```
 ### 6. Testing with initializer context
 If your tests require the RabbitMQ functionality, you must annotate your classes in the
 following way:
