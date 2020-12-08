@@ -48,7 +48,7 @@ public class TopicProcessor<T> {
     T converted = null;
 
     try {
-      log.info(
+      log.debug(
         "receivedRoutingKey {} - RabbitListener received message '{}' on channel {}",
         receivedRoutingKey, msg, channel
       );
@@ -71,7 +71,6 @@ public class TopicProcessor<T> {
       // We want to throw only after the message checks are done, to prevent infinite requeue
       var routingKey = optionalRoutingKey
         .orElseThrow(() -> new RouteNotFound(receivedRoutingKey));
-      log.info("Routing key: {}", routingKey);
 
       optionalProcessor = topicRouter.getEventProcessorByRoute(routingKey);
       var processor = optionalProcessor
@@ -97,7 +96,7 @@ public class TopicProcessor<T> {
   public void rejectMessage(Message message, Channel channel, long deliveryTag, Exception e) {
     try {
       channel.basicNack(deliveryTag, REJECT_MULTIPLE_DELIVERIES, REQUEUE_REJECTED_MESSAGES);
-      log.info("NACK-end message {} because of exception {}", message, e.getMessage());
+      log.debug("NACK-end message {} because of exception {}", message, e.getMessage());
     } catch (IOException ioException) {
       log.error("Could not NACK message {} due to IOException {}", message, ioException.getMessage());
       ioException.printStackTrace();
@@ -113,12 +112,8 @@ public class TopicProcessor<T> {
   }
 
   private void handleExceededMaxRetry(Message message, Channel channel, long deliveryTag) {
-    log.info("MaxRetries exceeded.");
-    shovelMessageToQueue(channel, message, deliveryTag);
-    log.info(
-      "Generating e-mail to inform that we have exceeded MaxRetry for message '{}'.",
-      message
-    );
+    log.debug("MaxRetries exceeded.");
+    shovelMessageToParkingLotQueue(channel, message, deliveryTag);
   }
 
   void acknowledgeProcessedMessage(
@@ -127,7 +122,7 @@ public class TopicProcessor<T> {
     long deliveryTag
   ) {
     try {
-      log.info(
+      log.debug(
         "{} - RabbitListener acknowledges delivery tag: {}",
         channel.getChannelNumber(),
         deliveryTag
@@ -184,8 +179,12 @@ public class TopicProcessor<T> {
     return areExchangesEqual && areQueuesEqual;
   }
 
-  void shovelMessageToQueue(Channel channel, Message failedMessage, long deliveryTag) {
-    log.info("Putting message '{}' into queue '{}'", failedMessage, topicConfig.getParkingLotQueueName());
+  void shovelMessageToParkingLotQueue(Channel channel, Message failedMessage, long deliveryTag) {
+    log.debug(
+      "Shoveling message '{}' into queue '{}'",
+      failedMessage,
+      topicConfig.getParkingLotQueueName()
+    );
 
     failedMessage.getMessageProperties()
       .setDeliveryMode(MessageDeliveryMode.PERSISTENT);
@@ -196,10 +195,8 @@ public class TopicProcessor<T> {
 
   Optional<String> extractRoutingKeyFromMessage(Message message, String receivedRoutingKey) {
     if (isMessageFromWaitQueue(receivedRoutingKey)) {
-      log.info("Message is from WAIT_QUEUE");
       return extractRoutingKeyFromMessageByQueue(message);
     } else if (isMessageFromParkingLotQueue(receivedRoutingKey)) {
-      log.info("MESSAGE is FROM PARKING LOT QUEUE");
       return extractRoutingKeyFromMessageByQueue(message);
     }
 

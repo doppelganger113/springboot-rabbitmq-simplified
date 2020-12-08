@@ -36,10 +36,7 @@ public class Config {
       .on("orders.created", myProcessor::process,
         myProcessor::onError
       )
-      .on("orders.updated", msg -> {
-        System.out.println(msg);
-      })
-//      .on("orders.custom", this.customEventProcessor)
+      .on("orders.custom", myProcessor)
       ;
   }
 
