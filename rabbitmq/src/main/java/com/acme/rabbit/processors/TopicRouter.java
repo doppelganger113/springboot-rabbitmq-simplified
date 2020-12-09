@@ -6,6 +6,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * Registers processing strategies based on the routing key.
+ *
+ * @param <T>
+ */
 public class TopicRouter<T> {
 
   private final Map<String, EventProcessor<T>> routeHandlers = new HashMap<>();

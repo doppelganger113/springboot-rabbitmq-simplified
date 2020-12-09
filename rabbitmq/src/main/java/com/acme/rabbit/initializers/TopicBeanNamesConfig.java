@@ -4,7 +4,7 @@ import lombok.Builder;
 import lombok.Data;
 
 /**
- * Used to provide a way of changing the bean names in case the need requires so.
+ * Way of changing the bean names in case the need requires so.
  */
 @Data
 @Builder

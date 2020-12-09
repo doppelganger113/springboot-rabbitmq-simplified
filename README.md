@@ -12,11 +12,11 @@ With this solution you can easily bootstrap the entire setup of:
  - Wait Queue
  - Parking lot Queue
 
-and have route based processors:
+With following route based processors:
 ```text
-            \/-- orders.burger --> BurgerProcessor 
+            /-- orders.burger --> BurgerProcessor 
 orders.* -> 
-            \\-- orders.pizza  --> PizzaProcessor
+            \-- orders.pizza  --> PizzaProcessor
 ```
 You will not need to worry about runtime exceptions as it's handled by the `TopicProcessor`. 
 
@@ -27,6 +27,10 @@ as you want, and it's usually per application.
 <p align="center">
   <img width="700" height="500" src="./assets/TopicExchange.png">
 </p>
+
+## Core
+This repository serves as an example with core logic located in `rabbitmq` module. Modules `models`, `orders` and 
+`restaurants` serve as examples that implement the core features. To get started check out the [setup](#setup) part. 
 
 Table of contents
 =================
@@ -96,6 +100,9 @@ if not altered, and the resulting names will be:
  - Parking lot queue: `orders-queue.parking-lot`
 
 ### 3. Register initializer in Spring
+Here we add initializer logic to Spring on start-up, so that required beans are set in application context. Because
+of this, if our tests use any RabbitMQ logic we will need to add this 
+[initializer context in our tests](#6-testing-with-initializer-context) as well.
 ```java
 @SpringBootApplication
 public class SpringApp {
@@ -112,6 +119,9 @@ public class SpringApp {
 First configuration is required to avoid circular dependency, you can
 place the RabbitClient wherever you like as long as it is not the next
 beans configuration class. 
+
+`RabbitClient` is a simple wrapper for the RabbitTemplate and does a simple conversion of an object to
+raw json.
 ```java
 @Configuration
 public class Config {
@@ -155,6 +165,9 @@ public class TopicConfiguration {
   }
 }
 ```
+Here, `BodyConverter` is used to transform the JSON input to the specified `Order` class. It's suggested to use 
+polymorphic data types to get the most diverse data schemas.
+
 ### 5. Attaching the listener
 In order to start processing messages, we need to attach the `TopicProcessor` to the `@RabbitListener`.
 To know about the name of the queue check the [topic configuration](#2-create-the-topic-and-queue-initializer).
@@ -190,6 +203,8 @@ public class SpringAppTest {
     // ...
 }
 ```
+To see more examples for testing with RabbitMQ see the tests of the `rabbitmq` module and 
+[Spring AMQP testing](https://docs.spring.io/spring-amqp/reference/html/#testing).
 
 ## Using event processors
 
@@ -221,16 +236,41 @@ public class BurgerProcessor implements EventProcessor<Order> {
 ### Registering
 To register a processor you just need to bind it to a specific route:
 ```java
-@Bean
-TopicRouter<Order> topicRouter() {
-return new TopicRouter<Order>()
-  .on("orders.created", burgerProcessor);
+@Configuration
+class TopicConfiguration {
+    // ...
+
+    @Bean
+    TopicRouter<Order> topicRouter() {
+    return new TopicRouter<Order>()
+      .on("orders.created", burgerProcessor);
+      // .on("orders.updated", updateProcessor); // You can chain and register how many you want
+    }
 }
 ```
+Also, you don't need to pass by reference, you can use lambdas to express logic:
+```java
+// You can add a single lambda as the main processing.
+// No additional error handling will be done in that case.
+new TopicRouter<Order>()
+    .on("orders.created", order -> {
+    
+    });
+
+// Optionally, you can add additional error handling lambda
+new TopicRouter<Order>()
+    .on("orders.created", order -> {
+      // processing logic
+    }, (error, nullableOrder) -> {
+      // additional error handling logic
+    });
+```
+But, the class reference is the preferred way due to simplicity and readability.
 
 ## TODO
 
  - [ ] Add validation
 
 ## Troubleshooting
+
 TODO

@@ -14,6 +14,13 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
+/**
+ * Handles message processing by doing acknowledgment, rejection, executing appropriate
+ * message processors based on routing key and handling exceptions. Performs retry logic
+ * and parking-lot queue shovelling after retry failed more than specified amount of time.
+ *
+ * @param <T>
+ */
 @Slf4j
 public class TopicProcessor<T> {
   private static final boolean REJECT_MULTIPLE_DELIVERIES = false;
