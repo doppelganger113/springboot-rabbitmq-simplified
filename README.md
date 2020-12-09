@@ -27,7 +27,7 @@ The following diagram illustrates a single domain setup, you can have as many of
 as you want, and it's usually per application. 
 
 <p align="center">
-  <img width="460" height="300" src="./assets/TopicExchange.png">
+  <img width="700" height="500" src="./assets/TopicExchange.png">
 </p>
 
 Table of contents
