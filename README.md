@@ -1,6 +1,6 @@
 # Spring boot RabbitMQ simplified
 
-## WORK IN PROGRESS
+![GitHub Action](https://github.com/doppelganger113/springboot-rabbitmq-simplified/workflows/Java%20CI%20with%20Maven/badge.svg)
 
 Example solution built of Spring boot [RabbitMQ](https://docs.spring.io/spring-boot/docs/current/reference/html/spring-boot-features.html#boot-features-rabbitmq)
 that handles failure through addition of dead-letter wait queue and parking lot queue. It provides easy
@@ -19,8 +19,6 @@ orders.* ->
             \\-- orders.pizza  --> PizzaProcessor
 ```
 You will not need to worry about runtime exceptions as it's handled by the `TopicProcessor`. 
-
-![GitHub Action](https://github.com/doppelganger113/springboot-rabbitmq-simplified/workflows/Java%20CI%20with%20Maven/badge.svg)
 
 ## Design
 The following diagram illustrates a single domain setup, you can have as many of these
