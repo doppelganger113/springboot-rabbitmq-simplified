@@ -2,14 +2,33 @@
 
 ## WORK IN PROGRESS
 
-Solution built of Spring boot [RabbitMQ](https://docs.spring.io/spring-boot/docs/current/reference/html/spring-boot-features.html#boot-features-rabbitmq)
+Example solution built of Spring boot [RabbitMQ](https://docs.spring.io/spring-boot/docs/current/reference/html/spring-boot-features.html#boot-features-rabbitmq)
 that handles failure through addition of dead-letter wait queue and parking lot queue. It provides easy
 setup methods and simple event processing with error handling built-in.
+
+With this solution you can easily bootstrap the entire setup of:
+ - Topic Exchange
+ - Worker Queue
+ - Wait Queue
+ - Parking lot Queue
+
+and have route based processors:
+```text
+            \/-- orders.burger --> BurgerProcessor 
+orders.* -> 
+            \\-- orders.pizza  --> PizzaProcessor
+```
+You will not need to worry about runtime exceptions as it's handled by the `TopicProcessor`. 
 
 ![GitHub Action](https://github.com/doppelganger113/springboot-rabbitmq-simplified/workflows/Java%20CI%20with%20Maven/badge.svg)
 
 ## Design
-TODO
+The following diagram illustrates a single domain setup, you can have as many of these
+as you want, and it's usually per application. 
+
+<p align="center">
+  <img width="460" height="300" src="./assets/TopicExchange.png">
+</p>
 
 Table of contents
 =================
@@ -17,7 +36,7 @@ Table of contents
 <!--ts-->
    * [Requirements](#requirements)
    * [Development](#development)
-   * [Usage](#usage)
+   * [Setup](#setup)
       * [Update application.yml](#1-spring-boot-rabbitmq-configuration)
       * [Create topic and queue initializer](#2-create-topic-and-queue-initializer)
       * [Register initializer in Spring](#3-register-initializer-in-spring)
@@ -37,7 +56,7 @@ Start RabbitMQ service via docker:
 docker-compose up -d --build
 ```
 
-## Usage
+## Setup
 
 ### 1. Spring boot RabbitMQ configuration
 ```yaml
@@ -54,7 +73,9 @@ spring:
         prefetch: 50
 ```
  
-### 2. Create topic and queue initializer
+### 2. Create the topic and queue initializer
+The initializer will dynamically create Exchange, Queues and Bindings beans at the application
+start and connect them. The TopicConfig is also provided through `ITopicConfig` interface.
 ```java
 public class OrdersTopicInitializer implements ApplicationContextInitializer<GenericApplicationContext> {
   @Override
@@ -66,6 +87,13 @@ public class OrdersTopicInitializer implements ApplicationContextInitializer<Gen
   }
 }
 ```
+Configuration `config` will build a default configuration based on the exchange name `orders`
+if not altered, and the resulting names will be:
+ - Exchange: `orders`
+ - Worker queue: `orders-queue`
+ - Wait queue: `orders-queue.wait`
+ - Parking lot queue: `orders-queue.parking-lot`
+
 ### 3. Register initializer in Spring
 ```java
 @SpringBootApplication
@@ -160,6 +188,10 @@ public class SpringAppTest {
     // ...
 }
 ```
+
+## TODO
+
+ - [ ] Add validation 
 
 ## Troubleshooting
 TODO
