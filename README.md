@@ -43,6 +43,9 @@ Table of contents
       * [Configuration](#4-configuration)
       * [Attaching the listener](#5-attaching-the-listener)
       * [Testing with initializer context](#6-testing-with-initializer-context)
+   * [Using event processors](#using-event-processors)
+      * [Implementing](#implementing)
+      * [Registering](#registering)
 <!--te-->
 
 ## Requirements
@@ -155,7 +158,8 @@ public class TopicConfiguration {
 }
 ```
 ### 5. Attaching the listener
-we can start processing messages based on the routing key.
+In order to start processing messages, we need to attach the `TopicProcessor` to the `@RabbitListener`.
+To know about the name of the queue check the [topic configuration](#2-create-the-topic-and-queue-initializer).
 ```java
 @Component
 class Consumer {
@@ -189,9 +193,46 @@ public class SpringAppTest {
 }
 ```
 
+## Using event processors
+
+### Implementing
+To create an event processor you just need to extend the `EventProcessor` interface
+with specified type. You can omit the `onError` method as by default it will do nothing.
+Use `onError` method if you want to do some additional processing like sending an email
+to notify about error or do some additional logging. Main error handling of exceptions is 
+handled either way.
+
+Main work of the processor is done in the `process` method. Here in the case of a polymorphic
+type we cast it to a proper subclass.
+```java
+@Component
+public class BurgerProcessor implements EventProcessor<Order> {
+
+  private final RabbitClient rabbitClient;
+
+  @Override
+  public void process(Order message) throws Exception {
+    var burger = (Burger) message;
+  }
+
+  @Override
+  public void onError(Exception e, @Nullable Order value) {
+  }
+}
+```
+### Registering
+To register a processor you just need to bind it to a specific route:
+```java
+@Bean
+TopicRouter<Order> topicRouter() {
+return new TopicRouter<Order>()
+  .on("orders.created", burgerProcessor);
+}
+```
+
 ## TODO
 
- - [ ] Add validation 
+ - [ ] Add validation
 
 ## Troubleshooting
 TODO
