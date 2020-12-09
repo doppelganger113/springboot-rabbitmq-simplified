@@ -1,4 +1,4 @@
-package com.acme.orders.events.models;
+package com.acme.models;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

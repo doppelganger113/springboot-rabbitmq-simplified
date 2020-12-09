@@ -1,6 +1,6 @@
 package com.acme.orders.events;
 
-import com.acme.orders.events.models.Order;
+import com.acme.models.Order;
 import com.acme.rabbit.processors.TopicProcessor;
 import com.rabbitmq.client.Channel;
 import org.springframework.amqp.core.Message;

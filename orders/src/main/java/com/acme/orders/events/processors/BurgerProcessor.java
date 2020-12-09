@@ -1,7 +1,7 @@
 package com.acme.orders.events.processors;
 
-import com.acme.orders.events.models.Burger;
-import com.acme.orders.events.models.Order;
+import com.acme.models.Burger;
+import com.acme.models.Order;
 import com.acme.rabbit.client.RabbitClient;
 import com.acme.rabbit.processors.EventProcessor;
 import lombok.RequiredArgsConstructor;

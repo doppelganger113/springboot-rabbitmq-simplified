@@ -1,4 +1,4 @@
-package com.acme.orders.events.models;
+package com.acme.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonSubTypes;

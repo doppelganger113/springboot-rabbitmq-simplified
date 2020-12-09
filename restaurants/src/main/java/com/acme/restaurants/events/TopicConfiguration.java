@@ -1,7 +1,6 @@
 package com.acme.restaurants.events;
 
-import com.acme.orders.events.models.Order;
-
+import com.acme.models.Order;
 import com.acme.rabbit.converters.BodyConverter;
 import com.acme.rabbit.initializers.ITopicConfig;
 import com.acme.rabbit.processors.TopicProcessor;

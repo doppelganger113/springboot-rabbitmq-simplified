@@ -1,6 +1,6 @@
 package com.acme.restaurants.events.processors;
 
-import com.acme.orders.events.models.Order;
+import com.acme.models.Order;
 import com.acme.rabbit.processors.EventProcessor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

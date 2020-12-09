@@ -1,6 +1,6 @@
 package com.acme.orders.events;
 
-import com.acme.orders.events.models.Order;
+import com.acme.models.Order;
 import com.acme.orders.events.processors.BurgerProcessor;
 import com.acme.rabbit.converters.BodyConverter;
 import com.acme.rabbit.initializers.ITopicConfig;

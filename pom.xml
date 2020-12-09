@@ -20,9 +20,10 @@
     </properties>
 
     <modules>
-        <module>libs</module>
+        <module>rabbitmq</module>
         <module>orders</module>
         <module>restaurants</module>
+        <module>models</module>
     </modules>
 
 
