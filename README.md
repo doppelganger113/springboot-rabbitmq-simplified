@@ -48,6 +48,7 @@ Table of contents
    * [Using event processors](#using-event-processors)
       * [Implementing](#implementing)
       * [Registering](#registering)
+      * [Data modeling](#data-modeling)
 <!--te-->
 
 ## Requirements
