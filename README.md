@@ -267,6 +267,65 @@ new TopicRouter<Order>()
 ```
 But, the class reference is the preferred way due to simplicity and readability.
 
+### Data modeling
+When using JSON it's advised to go with polymorphic data models to have flexibility with the incoming data.
+For example like in the `models` module:
+
+Abstract class which we will use for converting the incoming string message. Here you can configure the JSON
+sub types like `Pizza` and `Burger`.
+
+```java
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@SuperBuilder
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
+@JsonSubTypes({
+  @JsonSubTypes.Type(value = Pizza.class, name = "Pizza"),
+  @JsonSubTypes.Type(value = Burger.class, name = "Burger")
+})
+public abstract class Order {
+  @Nullable
+  String name;
+}
+```
+Concrete class to which we will convert the string message:
+Burger
+```java
+@Data
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
+@AllArgsConstructor
+@NoArgsConstructor
+@SuperBuilder
+public class Burger extends Order {
+  @Nullable
+  Integer calories;
+}
+```
+Pizza
+```java
+@Data
+@EqualsAndHashCode(callSuper = true)
+@AllArgsConstructor
+@NoArgsConstructor
+@SuperBuilder
+public class Pizza extends Order {
+  @Nullable
+  private String flavor;
+}
+```
+When sending the JSON message ensure that you include the "type" property and that it is valid, otherwise
+it will fail. Example JSON for this object would be:
+```text
+{"type":"Burger", "name": "LeBigMac", "calories", 3}
+```
+For Pizza it would be:
+```text
+{"type":"Pizza", "name": "quattro stagioni", "flavor", "cheese"}
+```
+
 ## TODO
 
  - [ ] Add validation
